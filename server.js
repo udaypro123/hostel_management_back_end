@@ -19,7 +19,7 @@ import annoucementRoutes from './routes/announcement.route.js';
 
 // Import middleware
 import errorHandler from './middleware/errorHandler.js'
-import  notFound  from './middleware/notFound.js';
+import notFound from './middleware/notFound.js';
 import express from 'express';
 
 const app = express();
@@ -39,23 +39,22 @@ app.use('/api/', limiter);
 
 // CORS configuration
 const allowedOrigins = [
-  process.env.FRONTEND_URL || 'http://localhost:5173','http://localhost:3000',
+  process.env.FRONTEND_URL , 'http://localhost:5173',
+  'http://127.0.0.1:5173'
 ];
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.error(`CORS blocked for origin: ${origin}`);
       callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true,
-  optionsSuccessStatus: 200,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
+  credentials: true
 }));
+
 
 app.options('*', cors());
 
@@ -73,11 +72,11 @@ mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-.then(() => console.log('✅ Connected to MongoDB'))
-.catch((error) => {
-  console.error('❌ MongoDB connection error:', error);
-  process.exit(1);
-});
+  .then(() => console.log('✅ Connected to MongoDB'))
+  .catch((error) => {
+    console.error('❌ MongoDB connection error:', error);
+    process.exit(1);
+  });
 
 app.get('/', (req, res) => {
   res.status(200).json({

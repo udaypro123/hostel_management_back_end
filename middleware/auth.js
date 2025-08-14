@@ -63,15 +63,22 @@ const protect = async (req, res, next) => {
 
 // Grant access to specific roles
 const authorize = (...roles) => {
-  console.log('Authorizing roles1:', roles);
   return (req, res, next) => {
+    // Skip auth check for preflight CORS requests
+    if (req.method === 'OPTIONS') {
+      return next();
+    }
+
+    console.log('Authorizing roles1:', roles);
     console.log('Authorizing req.user', req.user ? req.user.role : 'No user');
-    if (!roles.includes(req.user.role)) {
+
+    if (!req.user || !roles.includes(req.user.role)) {
       return res.status(403).json({
         success: false,
-        message: `User role ${req.user.role} is not authorized to access this route`
+        message: `User role ${req.user ? req.user.role : 'Unknown'} is not authorized to access this route`
       });
     }
+
     next();
   };
 };
