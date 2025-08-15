@@ -72,13 +72,7 @@ const wardenSchema = new mongoose.Schema({
   toObject: { virtuals: true }
 });
 
-// Virtual for full name
-// wardenSchema.virtual('fullName').get(function () {
-//   return `${this.firstName} ${this.lastName}`;
-// });
 
-// Index for better query performance
-wardenSchema.index({ email: 1 });
 wardenSchema.index({ isActive: 1 });
 
 // Middleware to handle duplicate email error

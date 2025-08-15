@@ -6,8 +6,8 @@ const sendTokenResponse = (user, tokens, statusCode, res) => {
   const options = {
     expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+    secure: process.env.NODE_ENV === 'development',
+    sameSite: process.env.NODE_ENV === 'development' ? 'none' : 'lax'
   };
 
   res
@@ -107,8 +107,8 @@ const refreshToken = async (req, res, next) => {
     const options = {
       expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+      secure: process.env.NODE_ENV === 'development',
+      sameSite: process.env.NODE_ENV === 'development' ? 'none' : 'lax'
     };
 
     res

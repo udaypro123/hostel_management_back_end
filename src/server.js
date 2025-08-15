@@ -7,10 +7,6 @@ import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
-
-// Load environment variables
-dotenv.config();
-
 // Import routes
 import authRoutes from './routes/auth.route.js';
 import userRoutes from './routes/users.route.js';
@@ -23,19 +19,22 @@ import annoucementRoutes from './routes/announcement.route.js';
 // Import middleware
 import errorHandler from './middleware/errorHandler.js';
 import notFound from './middleware/notFound.js';
+import connectDB from './db/index.js';
+import { app } from './app.js';
 
-const app = express();
+dotenv.config({
+  path:"./.env"
+});
 
-// ---- PROXY SETTINGS ----
-// Required for Vercel to correctly detect client IP for rate-limiting
-app.set('trust proxy', 1); // trust first proxy (Vercel edge)
 
-// ---- SECURITY ----
+app.set('trust proxy', 1); 
+
+// // ---- SECURITY ----
 app.use(helmet());
 
-// ---- RATE LIMITING ----
+// // ---- RATE LIMITING ----
 const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 min default
+  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
   max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100,
   message: {
     error: 'Too many requests from this IP, please try again later.'
@@ -45,54 +44,30 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
-// ---- CORS ----
-const allowedOrigins = [
-  process.env.FRONTEND_URL, 
-  'http://localhost:5173', 
-  'http://127.0.0.1:5173'
-];
 
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.error(`CORS blocked for origin: ${origin}`);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  exposedHeaders: ['Authorization'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
 
-app.options('*', cors());
 
-// ---- BODY PARSERS ----
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(cookieParser());
 app.use(compression());
 
-// ---- LOGGING ----
+// // ---- LOGGING ----
 app.use(morgan(process.env.NODE_ENV === 'development' ? 'dev' : 'combined'));
 
 // ---- MONGODB CONNECTION ----
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-  .then(() => console.log('✅ Connected to MongoDB'))
+connectDB()
+  .then(() => 
+  app.listen(process.env.PORT || 8000, ()=>{
+    console.log( `✅ Connected to MongoDB PORT ${process.env.PORT || 8000}`)
+  }))
   .catch((error) => {
     console.error('❌ MongoDB connection error:', error);
     process.exit(1);
   });
 
-// ---- HEALTH CHECK ----
+// // ---- HEALTH CHECK ----
 app.get('/', (req, res) => {
   res.status(200).json({
     success: true,
-    message: 'Backend is running. Try /api/health for details.'
+    message: 'Backend is running. '
   });
 });
 
@@ -114,20 +89,12 @@ app.use('/api/payment', paymentroutes);
 app.use('/api/announcement', annoucementRoutes);
 app.use('/api', wardenRoutes);
 
-// ---- STATIC FILES ----
-app.use('/uploads', express.static('uploads'));
 
-// ---- ERROR HANDLING ----
+// // ---- ERROR HANDLING ----
 app.use(notFound);
 app.use(errorHandler);
 
-// ---- SERVER ----
-const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
-
-// ---- GRACEFUL SHUTDOWN ----
+// // ---- GRACEFUL SHUTDOWN ----
 const gracefulShutdown = () => {
   console.log('Gracefully shutting down...');
   server.close(() => {

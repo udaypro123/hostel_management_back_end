@@ -95,7 +95,6 @@ const updateUserProfile = async (userId, updateData) => {
   }
 };
 
-// // Change user password
 // const changePassword = async (userId, currentPassword, newPassword) => {
 //   try {
 //     const user = await User.findById(userId);
