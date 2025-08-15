@@ -1,4 +1,4 @@
-import {authService} from '../dbc/index.js'
+import { authService } from '../dbc/index.js'
 
 // Helper function to send token response
 const sendTokenResponse = (user, tokens, statusCode, res) => {
@@ -6,7 +6,7 @@ const sendTokenResponse = (user, tokens, statusCode, res) => {
   const options = {
     expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: process.env.NODE_ENV === 'development',
     sameSite: 'strict'
   };
 
@@ -60,7 +60,7 @@ const logout = async (req, res, next) => {
   try {
     const refreshToken = req.cookies.refreshToken || req.body.refreshToken;
     const result = await authService.logoutUser(req.user._id, refreshToken);
-    
+
     // Clear cookies
     res.clearCookie('token');
     res.clearCookie('refreshToken');
@@ -102,7 +102,7 @@ const refreshToken = async (req, res, next) => {
   try {
     const refreshToken = req.cookies.refreshToken || req.body.refreshToken;
     const result = await authService.refreshAccessToken(refreshToken);
-    
+
     // Cookie options
     const options = {
       expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
@@ -134,7 +134,7 @@ const forgotPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
     const result = await authService.forgotPassword(email);
-    
+
     res.status(200).json({
       success: true,
       message: result.message
@@ -154,7 +154,7 @@ const resetPassword = async (req, res, next) => {
   try {
     const { password } = req.body;
     const result = await authService.resetPassword(req.params.resettoken, password);
-    
+
     res.status(200).json({
       success: true,
       message: result.message
@@ -173,7 +173,7 @@ const resetPassword = async (req, res, next) => {
 const verifyEmail = async (req, res, next) => {
   try {
     const result = await authService.verifyEmail(req.params.token);
-    
+
     res.status(200).json({
       success: true,
       message: result.message
@@ -192,7 +192,7 @@ const verifyEmail = async (req, res, next) => {
 const resendVerification = async (req, res, next) => {
   try {
     const result = await authService.resendVerificationEmail(req.user._id);
-    
+
     res.status(200).json({
       success: true,
       message: result.message
@@ -205,7 +205,7 @@ const resendVerification = async (req, res, next) => {
   }
 };
 
-export  {
+export {
   register,
   login,
   logout,
