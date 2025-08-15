@@ -13,10 +13,10 @@ const router = express.Router();
 router.use(protect);
 
 
-router.post("/paymentTransaction", authorize('student'), paymentTransaction)
-router.post("/createOrder", authorize('student'), createOrder)
-router.post("/verifyOrder", authorize('student'), verifyOrder)
-router.get("/getStudentpaymentByID", authorize('admin','student','warden'), getStdudentPaymenetById)
+router.post("/paymentTransaction", paymentTransaction)
+router.post("/createOrder", createOrder)
+router.post("/verifyOrder", verifyOrder)
+router.get("/getStudentpaymentByID",  getStdudentPaymenetById)
 // router.get("/getStudents", authorize('admin','warden','student'), getStudents)
 // router.put("/updateStudent", authorize('admin'), updateStudent)
 // router.delete("/deleteStudent", authorize('admin'), deleteStudent)

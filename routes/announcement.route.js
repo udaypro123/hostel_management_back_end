@@ -12,9 +12,9 @@ const router = express.Router();
 router.use(protect);
 
 
-router.post("/createAnnoucement", authorize('admin'), createAnnoucement)
-router.get("/getAllAnouncement", authorize('admin', 'warden', 'student'), getAllAnouncement)
-router.put("/updateAnouncement", authorize('admin'), updateAnouncement)
-router.delete("/deleteAnouncement", authorize('admin'), deleteAnouncement)
+router.post("/createAnnoucement",  createAnnoucement)
+router.get("/getAllAnouncement", getAllAnouncement)
+router.put("/updateAnouncement",  updateAnouncement)
+router.delete("/deleteAnouncement",  deleteAnouncement)
 
 export default router;
