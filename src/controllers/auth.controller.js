@@ -1,4 +1,5 @@
 import { authService } from '../dbc/index.js'
+import { ApiError } from '../utils/apiError.js';
 
 // Helper function to send token response
 const sendTokenResponse = (user, tokens, statusCode, res) => {
@@ -43,6 +44,9 @@ const register = async (req, res, next) => {
 const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
+    if(!email || !password){
+      throw new ApiError (400, "email or password requuired")
+    }
     const result = await authService.loginUser(email, password);
     sendTokenResponse(result.user, result.tokens, 200, res);
   } catch (error) {
