@@ -79,6 +79,7 @@ app.use('/api/students', studentAndDegreeRoutes);
 app.use('/api/payment', paymentroutes);
 app.use('/api/announcement', annoucementRoutes);
 app.use('/api', wardenRoutes);
+app.use('/api', uploadRoutes);
 
 // // ---- STATIC FILES ----
 // app.use('/uploads', express.static('uploads'));
