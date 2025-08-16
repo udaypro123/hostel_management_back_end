@@ -24,7 +24,7 @@ import {
 const router = express.Router();
 
 // Public routes
-router.post('/register', authRateLimit, validateRegister, register);
+router.post('/register', authRateLimit, register);
 router.post('/login', authRateLimit, validateLogin, login);
 router.post('/refresh', refreshToken);
 router.post('/forgot-password', authRateLimit, validateForgotPassword, forgotPassword);
