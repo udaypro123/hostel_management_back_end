@@ -17,7 +17,7 @@ import { protect, authorize } from '../middleware/auth.js';
 const router = express.Router();
 
 // Protected routes
-// router.use(protect);
+router.use(protect);
 
 // Admin routes
 router.post('/createHostel', createHostel);

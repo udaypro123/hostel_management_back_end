@@ -5,8 +5,9 @@ import rateLimit from 'express-rate-limit';
 const protect = async (req, res, next) => {
   try {
     let token;
-
     // Check for token in headers
+    console.log("req.headers.authorization", req.headers.authorization)
+    console.log("req.cookies.token", req.cookies.token)
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
       token = req.headers.authorization.split(' ')[1];
     }
@@ -14,6 +15,7 @@ const protect = async (req, res, next) => {
     else if (req.cookies.token) {
       token = req.cookies.token;
     }
+    console.log("req.cookies.token", req.cookies.token, token)
 
     // Make sure token exists
     if (!token) {
@@ -25,10 +27,13 @@ const protect = async (req, res, next) => {
 
     try {
       // Verify token
+      console.log("process.env.JWT_SECRET", process.env.JWT_SECRET)
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
+      console.log("decoded", decoded)
+      
       // Get user from the token
       const user = await User.findById(decoded.id);
+      console.log("useruseruser", user)
 
       if (!user) {
         return res.status(401).json({
@@ -65,6 +70,7 @@ const protect = async (req, res, next) => {
 const authorize = (...roles) => {
   return (req, res, next) => {
     // Skip auth check for preflight CORS requests
+    console.log("Authorizing roles1:", req.method )
     if (req.method === 'OPTIONS') {
       return next();
     }
