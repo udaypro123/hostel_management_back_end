@@ -12,6 +12,7 @@ import wardenRoutes from './routes/wardens.route.js';
 import studentAndDegreeRoutes from './routes/student.route.js';
 import paymentroutes from './routes/payment.route.js';
 import annoucementRoutes from './routes/announcement.route.js';
+import uploadRoutes from './routes/upload.route.js';
 
 // Import middleware
 import errorHandler from './middleware/errorHandler.js';
