@@ -20,15 +20,15 @@ const router = express.Router();
 router.use(protect);
 
 // Admin routes
-router.post('/createHostel', createHostel);
-router.get('/getHostels', getHostels);
-router.put('/updateHostel', updateHostel);
-router.delete('/deleteHostel', deleteHostel);
+router.post('/createHostel', authorize('admin'), createHostel);
+router.get('/getHostels', authorize('admin', "warden", 'student'), getHostels);
+router.put('/updateHostel', authorize('admin'), updateHostel);
+router.delete('/deleteHostel', authorize('admin'), deleteHostel);
 
 // Room routes
-router.post('/addRoomToHostel', addRoomToHostel);
-router.get('/getAllRooms', getAllRooms);
-router.put('/updateRoomInHostel', updateRoomInHostel);
-router.delete('/deleteRoom', deleteRoom);
+router.post('/addRoomToHostel', authorize('admin'), addRoomToHostel);
+router.get('/getAllRooms', authorize('admin', "warden", 'student'), getAllRooms);
+router.put('/updateRoomInHostel', authorize('admin'), updateRoomInHostel);
+router.delete('/deleteRoom', authorize('admin'), deleteRoom);
 
 export default router;

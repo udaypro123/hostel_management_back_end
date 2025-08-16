@@ -18,15 +18,15 @@ const router = express.Router();
 router.use(protect);
 
 
-router.post("/createStudent",  createStudent)
-router.get("/getStudents",getStudents)
-router.put("/updateStudent",  updateStudent)
-router.delete("/deleteStudent",  deleteStudent)
-router.get("/getStudentById",getStudentById)
+router.post("/createStudent", authorize('admin', "warden"), createStudent)
+router.get("/getStudents", authorize('admin', "warden", 'student'), getStudents)
+router.put("/updateStudent", authorize('admin', "warden"), updateStudent)
+router.delete("/deleteStudent", authorize('admin', "warden"), deleteStudent)
+router.get("/getStudentById",authorize('admin', "warden", 'student'), getStudentById)
 
-router.post("/addDegree", addGree)
-router.get("/getDegree",getAllDegree)
-router.put("/updateDegree", updateDegree)
-router.delete("/deleteDegree", deleteDegree)
+router.post("/addDegree",authorize('admin', "warden"), addGree)
+router.get("/getDegree",authorize('admin', "warden", 'student'), getAllDegree)
+router.put("/updateDegree",authorize('admin', "warden"), updateDegree)
+router.delete("/deleteDegree",authorize('admin', "warden"), deleteDegree)
 
 export default router;

@@ -17,10 +17,10 @@ const router = express.Router();
 router.use(protect);
 
 // Routes
-router.post('/warden',  createWarden);
-router.get('/warden', getWarden);
-router.get('/getWardenById', getWardenById);
-router.put('/updateWarden',  updateWarden);
-router.delete('/deleteWarden',  deleteWarden);
+router.post('/warden',authorize('admin'),  createWarden);
+router.get('/warden', authorize('admin', "warden", 'student'), getWarden);
+router.get('/getWardenById',authorize('admin', "warden", 'student'), getWardenById);
+router.put('/updateWarden', authorize('admin'), updateWarden);
+router.delete('/deleteWarden',authorize('admin'),  deleteWarden);
 
 export default router;
