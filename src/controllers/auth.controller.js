@@ -4,11 +4,13 @@ import { ApiError } from '../utils/apiError.js';
 // Helper function to send token response
 const sendTokenResponse = (user, tokens, statusCode, res) => {
   // Cookie options
+  const isProduction = process.env.NODE_ENV === "production";
+  console.log("isProduction", isProduction)
   const options = {
     expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'development',
-    sameSite: process.env.NODE_ENV === 'development' ? 'none' : 'lax'
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax'
   };
 
   res
