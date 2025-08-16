@@ -6,8 +6,9 @@ const protect = async (req, res, next) => {
   try {
     let token;
     // Check for token in headers
-    console.log("req.headers.authorization", req.headers.authorization)
-    console.log("req.cookies.token", req.cookies.token)
+    console.log("req.headers", req)
+    console.log("req.headers", req.headers)
+    console.log("req.cookies", req.cookies)
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
       token = req.headers.authorization.split(' ')[1];
     }
