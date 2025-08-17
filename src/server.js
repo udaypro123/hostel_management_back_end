@@ -13,6 +13,7 @@ import studentAndDegreeRoutes from './routes/student.route.js';
 import paymentroutes from './routes/payment.route.js';
 import annoucementRoutes from './routes/announcement.route.js';
 import uploadRoutes from './routes/upload.route.js';
+import aiRoutes from './routes/upload.route.js';
 
 // Import middleware
 import errorHandler from './middleware/errorHandler.js';
@@ -81,6 +82,7 @@ app.use('/api/payment', paymentroutes);
 app.use('/api/announcement', annoucementRoutes);
 app.use('/api', wardenRoutes);
 app.use('/api', uploadRoutes);
+app.use("/api/ai", aiRoutes);
 
 // // ---- STATIC FILES ----
 // app.use('/uploads', express.static('uploads'));
