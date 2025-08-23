@@ -64,7 +64,7 @@ class AuthService {
       // Use the static method to authenticate
       const result = await User.getAuthenticated(email, password);
       
-      console.log("result", result)
+      // console.log("result", result)
 
       if (!result.user) {
         let message = 'Invalid credentials';

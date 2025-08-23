@@ -1,5 +1,13 @@
 import { ResponseCode } from "../utils/responseList.js";
-import { spawn } from "child_process";
+import Groq from "groq-sdk";
+import { tavily } from "@tavily/core"
+import { AiResponseModel } from "../models/Students.models.js";
+
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
+const tvly = tavily({ apiKey: process.env.TAVILY_API_KEY })
+
+// import { spawn } from "child_process";
+
 
 // Logger
 const logger = {
@@ -8,83 +16,137 @@ const logger = {
   }
 };
 
-// Mock DB (can be replaced by Mongo/Postgres later)
-const hostelData = {
-  students: [
-    { id: 1, name: "Aman Kumar", room: "B-204", pendingFee: 5000 }
-  ],
-  rooms: [
-    { roomNo: "B-201", occupied: true },
-    { roomNo: "B-202", occupied: false }
-  ]
-};
+async function webSearch({ query }) {
+  console.log("webSearch is calling ...");
+  const response = await tvly.search(query);
+  const responseContent = response.results.map((result) => result.content).join("\n\n");
+  return responseContent;
+}
 
-// Helper: talk to Ollama
-const runOllama = (prompt) => {
-  return new Promise((resolve, reject) => {
-    const ollama = spawn("ollama", ["run", "llama3"], {
-      stdio: ["pipe", "pipe", "pipe"]
-    });
-
-    let output = "";
-    ollama.stdout.on("data", (data) => (output += data.toString()));
-    ollama.stderr.on("data", (err) => console.error("AI Error:", err.toString()));
-    ollama.on("close", () => resolve(output.trim()));
-    ollama.stdin.write(prompt);
-    ollama.stdin.end();
-  });
-};
-
-// Main DB function
 const AskFromAi = async (body, callback) => {
   try {
-    const query = body.query?.toLowerCase();
 
-    // Custom rule-based answers
-    if (query.includes("fee")) {
-      return callback(
-        null,
-        ResponseCode.SuccessCode,
-        `Your pending hostel fee is ₹${hostelData.students[0].pendingFee}`
-      );
+    const { query, sender } = body;
+    const messages = [
+      {
+        role: "system",
+        content: `you are Hostel Assistant, you have access to real-time information.
+                    1. You can search the web for the latest information.
+                    2. You can provide summaries of current events.
+                    3. You can answer questions about recent developments.
+                    4. webSearch({ query }: { query: string }) current DateTime : ${new Date().toUTCString()}`
+      },
+    ]
+
+    const dbdata = {
+      sender: "user",
+      content: query
     }
 
-    if (query.includes("room")) {
-      return callback(
-        null,
-        ResponseCode.SuccessCode,
-        `You are in room no. ${hostelData.students[0].room}`
-      );
+    const userExists = await AiResponseModel.findOne({ userId: sender });
+    console.log("userExists", userExists);
+
+    if (userExists) {
+      userExists.studentChat.push(dbdata);
+      await userExists.save();
+    } else {
+      const aiResponse = new AiResponseModel({
+        userId: sender,
+        studentChat: [dbdata]
+      });
+      await aiResponse.save();
     }
 
-    if (query.includes("vacant")) {
-      const vacant = hostelData.rooms.filter((r) => !r.occupied);
-      return callback(
-        null,
-        ResponseCode.SuccessCode,
-        `Vacant rooms: ${vacant.map((r) => r.roomNo).join(", ")}`
-      );
-    }
-
-    if (query.includes("complaint")) {
-      return callback(
-        null,
-        ResponseCode.SuccessCode,
-        "Your complaint has been registered with hostel management."
-      );
-    }
-
-    // Otherwise fallback to LLM
-    const aiReply = await runOllama(body.query);
-    return callback(null, ResponseCode.SuccessCode, aiReply);
-  } catch (err) {
-    logger.log({
-      level: "error",
-      message: "DBC Error - " + err,
-      requestId: "Unknown"
+    messages.push({
+      role: "user",
+      content: query
     });
+
+    while (true) {
+
+      const completion = await groq.chat.completions
+        .create({
+          temperature: 0,
+          model: "llama-3.3-70b-versatile",
+          messages: messages,
+          tools: [
+            {
+              type: "function",
+              function: {
+                name: "webSearch",
+                description: "search and retrieve real time information from the web",
+                parameters: {
+                  type: "object",
+                  properties: {
+                    query: {
+                      type: "string",
+                      description: "The search query to look up"
+                    }
+                  },
+                  required: ["query"]
+                }
+              }
+            }
+          ],
+          tool_choice: "auto",
+        })
+
+      messages.push(completion.choices[0]?.message);
+      const toolCalls = completion.choices[0]?.message?.tool_calls;
+      console.log("Tool Calls:", toolCalls, completion.choices[0]?.message);
+      if (!toolCalls) {
+        console.log("Assistant:", completion.choices[0]?.message.content);
+        // Save the AI response to the database
+        const userExistss = await AiResponseModel.findOne({ userId: sender });
+        const resdata = {
+          sender: "bot",
+          content: completion.choices[0]?.message.content
+        }
+        if (userExistss) {
+          userExistss.studentChat.push(resdata);
+          await userExistss.save();
+        } else {
+          const aiResponse = new AiResponseModel({
+            userId: sender,
+            studentChat: [resdata]
+          });
+          await aiResponse.save();
+        }
+
+        return callback(null, ResponseCode.SuccessCode, completion.choices[0]);
+      }
+
+      for (const tool of toolCalls) {
+        console.log("Tool Call:", tool, tool.function.arguments);
+        if (tool.function.name === "webSearch") {
+          const result = await webSearch(JSON.parse(tool.function.arguments));
+          // console.log(result);
+          messages.push({
+            tool_call_id: tool.id,
+            role: "tool",
+            name: tool.function.name,
+            content: result
+          });
+        }
+      }
+    }
+
+
+  } catch (err) {
+    logger.log({ level: "error", message: "DBC Error - " + err, requestId: "Unknown" });
     return callback(err, ResponseCode.ServerError, null);
   }
 };
 
-export { AskFromAi };
+const GetAIChatbyUserId = async (userId, callback) => {
+  try {
+    console.log("userId:--------> ", userId)
+    const userChat = await AiResponseModel.findOne({ userId });
+    console.log("userChat:--------> ", userChat, userChat.studentChat)
+    return callback(null, ResponseCode.SuccessCode, userChat.studentChat);
+  } catch (error) {
+    return callback(error, ResponseCode.ServerError, null);
+  }
+};
+
+export { AskFromAi, GetAIChatbyUserId };

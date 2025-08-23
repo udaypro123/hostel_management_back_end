@@ -13,7 +13,8 @@ import studentAndDegreeRoutes from './routes/student.route.js';
 import paymentroutes from './routes/payment.route.js';
 import annoucementRoutes from './routes/announcement.route.js';
 import uploadRoutes from './routes/upload.route.js';
-import aiRoutes from './routes/upload.route.js';
+import aiRoutes from './routes/ai.route.js';
+import requestsRoutes from "./routes/requests.route.js";
 
 // Import middleware
 import errorHandler from './middleware/errorHandler.js';
@@ -80,6 +81,7 @@ app.use('/api/hostels', hostelRoutes);
 app.use('/api/students', studentAndDegreeRoutes);
 app.use('/api/payment', paymentroutes);
 app.use('/api/announcement', annoucementRoutes);
+app.use('/api/requests', requestsRoutes);
 app.use('/api', wardenRoutes);
 app.use('/api', uploadRoutes);
 app.use("/api/ai", aiRoutes);

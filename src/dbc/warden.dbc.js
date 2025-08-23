@@ -22,12 +22,12 @@ const createWarden = async (wardenData) => {
     }
 
 
-    console.log("Incoming data =>", phone, email, wardenData, obj);
+    // console.log("Incoming data =>", phone, email, wardenData, obj);
 
     // Check if a user already exists with the email or phone
     const existingUser = await authService.registerUser(obj)
 
-    console.log("existingUser", existingUser?.user, existingUser?.user?._id, existingUser?.user?.id)
+    // console.log("existingUser", existingUser?.user, existingUser?.user?._id, existingUser?.user?.id)
 
     // Link Warden with User ID
     const warden = new Warden({
@@ -40,7 +40,7 @@ const createWarden = async (wardenData) => {
     if (!savedWarden && existingUser?.user?.id) {
       // Rollback the user if warden creation failed
       await User.findByIdAndDelete(existingUser?.user?.id);
-      console.log("Rolled back newly created user due to warden save failure");
+      // console.log("Rolled back newly created user due to warden save failure");
     }
     return savedWarden;
   } catch (error) {

@@ -24,6 +24,25 @@ const degreeSchema = new mongoose.Schema({
 
 }, { timestamps: true })
 
+const aiResponseSchema = new mongoose.Schema({
+    userId: {
+        type: String,
+        required: true
+    },
+    studentChat: [{
+        sender: {
+            type: String,
+            required: true
+        },
+        content: {
+            type: String,
+            required: true
+        },
+
+    }]
+
+}, { timestamps: true })
+
 const studentSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -45,5 +64,6 @@ const studentSchema = new mongoose.Schema({
 
 
 const Degree = mongoose.model("Degree", degreeSchema);
+const AiResponseModel = mongoose.model("AiResponseModel", aiResponseSchema);
 const Student = mongoose.model("Student", studentSchema);
-export { Student, Degree };
+export { Student, Degree, AiResponseModel };

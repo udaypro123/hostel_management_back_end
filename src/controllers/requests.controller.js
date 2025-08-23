@@ -1,133 +1,121 @@
+import e from "express";
 import {
-  PaymentTransactionModel,
-  CreateOrder,
-  VerifyOrder,
-  GetStdudentPaymenetById,
-} from "../dbc/payment.dbc.js"
+    CreateRequests,
+    GetAllRequests,
+    UpdateRequests,
+    DeleteRequest,
+} from "../dbc/requests.dbc.js"
 import { ResponseCode } from "../utils/responseList.js";
-
-
 // Add this once at the top of your file
 const logger = {
-  log: ({ level, message, requestId }) => {
-    console.log(`[${level.toUpperCase()}] [RequestID: ${requestId}] ${message}`);
-  }
+    log: ({ level, message, requestId }) => {
+        console.log(`[${level.toUpperCase()}] [RequestID: ${requestId}] ${message}`);
+    }
 };
 
 
 
+const createRequests = function (req, res, next) {
 
-const paymentTransaction = function (req, res, next) {
-  PaymentTransactionModel(req.body, (err, code, payment) => {
-    if (err) {
-      // Internal server error
-      logger.log({
-        level: 'error',
-        message: 'add Payment Transaction - Error - ' + err,
-        requestId: req?.id || "Unknown"
-      });
-      return res.status(500).json({ code: ResponseCode.ServerError, message: 'Internal server error', error: err.message || err });
-    }
+    console.log("--------------->req ", req.body)
+    CreateRequests(req.body, (err, code, request) => {
+        if (err) {
+            // Internal server error
+            logger.log({
+                level: 'error',
+                message: 'add request - Error - ' + err,
+                requestId: req?.id || "Unknown"
+            });
+            return res.status(500).json({ code: ResponseCode.ServerError, message: 'Internal server error', error: err.message || err });
+        }
 
-    if (code === ResponseCode.SuccessCode) {
-      return res.status(200).json({ code, message: "Payment Transaction created successfully", data:payment });
-    }
+        if (code === ResponseCode.SuccessCode) {
+            return res.status(200).json({ code, message: "request created successfully", request });
+        }
 
-    // handle known errors
-    if (code === ResponseCode.degreeAlreadyExits) {
-      return res.status(409).json({ code, message: "Payment Transaction already exists" });
-    }
-
-    // fallback error
-    return res.status(422).json({ code, message: "Error while creating payment" });
-  });
+        // fallback error
+        return res.status(422).json({ code, message: "Error while creating request" });
+    });
 };
 
-const createOrder = function (req, res, next) {
+const getAllRequests = function (req, res, next) {
 
-  const orderId = generateOrderId()
-  console.log("orderId---------->", orderId)
+    console.log("req--------->getAllRequests-", req.body)
+    GetAllRequests(req.body, (err, code, request) => {
+        console.log("getAllRequests", request)
+        if (err) {
+            // Internal server error
+            logger.log({
+                level: 'error',
+                message: 'add request - Error - ' + err,
+                requestId: req?.id || "Unknown"
+            });
+            return res.status(500).json({ code: ResponseCode.ServerError, message: 'Internal server error', error: err.message || err });
+        }
 
-  CreateOrder(req.body,orderId, (err, code, payment) => {
-    if (err) {
-      // Internal server error
-      logger.log({
-        level: 'error',
-        message: 'add Payment Transaction - Error - ' + err,
-        requestId: req?.id || "Unknown"
-      });
-      return res.status(500).json({ code: ResponseCode.ServerError, message: 'Internal server error', error: err.message || err });
-    }
+        if (code === ResponseCode.SuccessCode) {
+            return res.status(200).json({ code, message: "fetch request successfully", data: request });
+        }
 
-    if (code === ResponseCode.SuccessCode) {
-      return res.status(200).json({ code, message: "Payment Transaction created successfully", data:payment });
-    }
-
-    // handle known errors
-    if (code === ResponseCode.degreeAlreadyExits) {
-      return res.status(409).json({ code, message: "Payment Transaction already exists" });
-    }
-
-    // fallback error
-    return res.status(422).json({ code, message: "Error while creating payment" });
-  });
+        // fallback error
+        return res.status(422).json({ code, message: "Error while creating request" });
+    });
 };
 
-const verifyOrder = function (req, res, next) {
 
+const updateRequests = function (req, res, next) {
 
-  VerifyOrder(req.body, (err, code, payment) => {
-    if (err) {
-      // Internal server error
-      logger.log({
-        level: 'error',
-        message: 'add Payment Transaction - Error - ' + err,
-        requestId: req?.id || "Unknown"
-      });
-      return res.status(500).json({ code: ResponseCode.ServerError, message: 'Internal server error', error: err.message || err });
-    }
+    console.log("updateRequests----------->", req.body)
+    UpdateRequests(req.body, (err, code, request) => {
+        console.log("degreedegreedegree", request)
+        if (err) {
+            // Internal server error
+            logger.log({
+                level: 'error',
+                message: 'add request - Error - ' + err,
+                requestId: req?.id || "Unknown"
+            });
+            return res.status(500).json({ code: ResponseCode.ServerError, message: 'Internal server error', error: err.message || err });
+        }
 
-    if (code === ResponseCode.SuccessCode) {
-      return res.status(200).json({ code, message: "Payment Transaction created successfully", data:payment });
-    }
+        if (code === ResponseCode.SuccessCode) {
+            return res.status(200).json({ code, message: "request updated successfully", data: request });
+        }
 
-    // handle known errors
-    if (code === ResponseCode.degreeAlreadyExits) {
-      return res.status(409).json({ code, message: "Payment Transaction already exists" });
-    }
-
-    // fallback error
-    return res.status(422).json({ code, message: "Error while creating payment" });
-  });
+        // fallback error
+        return res.status(422).json({ code, message: "Error while updating request" });
+    });
 };
 
-const getStdudentPaymenetById = function (req, res, next) {
+const deleteRequest = function (req, res, next) {
+    const { requestId } = req.body
+    DeleteRequest(requestId, (err, code, request) => {
+        console.log("degreedegreedegree", request)
+        if (err) {
+            // Internal server error
+            logger.log({
+                level: 'error',
+                message: 'add request - Error - ' + err,
+                requestId: req?.id || "Unknown"
+            });
+            return res.status(500).json({ code: ResponseCode.ServerError, message: 'Internal server error', error: err.message || err });
+        }
 
-  GetStdudentPaymenetById(req.body, (err, code, payment) => {
-    console.log("degreedegreedegree", payment)
-    if (err) {
-      // Internal server error
-      logger.log({
-        level: 'error',
-        message: 'add Payment Transaction - Error - ' + err,
-        requestId: req?.id || "Unknown"
-      });
-      return res.status(500).json({ code: ResponseCode.ServerError, message: 'Internal server error', error: err.message || err });
-    }
+        if (code === ResponseCode.SuccessCode) {
+            return res.status(200).json({ code, message: "request deleted successfully", data: request });
+        }
 
-    if (code === ResponseCode.SuccessCode) {
-      return res.status(200).json({ code, message: "fetch Payment list successfully", data: payment });
-    }
-
-    // fallback error
-    return res.status(422).json({ code, message: "Error while fetching payment" });
-  });
+        // fallback error
+        return res.status(422).json({ code, message: "Error while deleting request" });
+    });
 };
+
+
 
 
 export {
-  paymentTransaction,
-  createOrder,
-  verifyOrder,
-  getStdudentPaymenetById,
-}
+    createRequests,
+    getAllRequests,
+    updateRequests,
+    deleteRequest,
+} 

@@ -1,4 +1,4 @@
-import { AskFromAi } from "../dbc/ai.dbc.js";
+import { AskFromAi , GetAIChatbyUserId} from "../dbc/ai.dbc.js";
 import { ResponseCode } from "../utils/responseList.js";
 
 // Logger
@@ -12,6 +12,7 @@ const askFromAi = function (req, res) {
   console.log("--------------->req ", req.body);
 
   AskFromAi(req.body, (err, code, ask) => {
+    // console.log("code and ask--------->", code , ask , ResponseCode.SuccessCode )
     if (err) {
       logger.log({
         level: "error",
@@ -28,7 +29,7 @@ const askFromAi = function (req, res) {
     if (code === ResponseCode.SuccessCode) {
       return res
         .status(200)
-        .json({ code, message: "AI reply generated successfully", ask });
+        .json({ code, message: "AI reply generated successfully", data:ask });
     }
 
     return res
@@ -37,4 +38,34 @@ const askFromAi = function (req, res) {
   });
 };
 
-export { askFromAi };
+const getAIChatbyUserId = function (req, res, next) {
+  console.log("getAIChatbyUserId===?. ", req.query);
+
+  GetAIChatbyUserId(req.query.userId, (err, code, ask) => {
+    // console.log("code and ask--------->", code , ask , ResponseCode.SuccessCode )
+    if (err) {
+      logger.log({
+        level: "error",
+        message: "AskFromAi - Error - " + err,
+        requestId: req?.id || "Unknown"
+      });
+      return res.status(500).json({
+        code: ResponseCode.ServerError,
+        message: "Internal server error",
+        error: err.message || err
+      });
+    }
+
+    if (code === ResponseCode.SuccessCode) {
+      return res
+        .status(200)
+        .json({ code, message: "AI reply generated successfully", data:ask });
+    }
+
+    return res
+      .status(422)
+      .json({ code, message: "Error while generating AI reply" });
+  });
+};
+
+export { askFromAi, getAIChatbyUserId };

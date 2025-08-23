@@ -1,16 +1,11 @@
 import express from "express";
 
 import {
-    addGree,
-    getAllDegree,
-    updateDegree,
-    deleteDegree,
-    createStudent,
-    getStudents,
-    updateStudent,
-    deleteStudent,
-    getStudentById
-} from '../controllers/student.controller.js'
+    createRequests,
+    getAllRequests,
+    updateRequests,
+    deleteRequest,
+} from '../controllers/requests.controller.js'
 
 import { authorize, protect } from "../middleware/auth.js";
 const router = express.Router();
@@ -18,15 +13,9 @@ const router = express.Router();
 router.use(protect);
 
 
-router.post("/createStudent", authorize('admin', "warden"), createStudent)
-router.get("/getStudents", authorize('admin', "warden", 'student'), getStudents)
-router.put("/updateStudent", authorize('admin', "warden"), updateStudent)
-router.delete("/deleteStudent", authorize('admin', "warden"), deleteStudent)
-router.get("/getStudentById",authorize('admin', "warden", 'student'), getStudentById)
-
-router.post("/addDegree",authorize('admin', "warden"), addGree)
-router.get("/getDegree",authorize('admin', "warden", 'student'), getAllDegree)
-router.put("/updateDegree",authorize('admin', "warden"), updateDegree)
-router.delete("/deleteDegree",authorize('admin', "warden"), deleteDegree)
+router.post("/createRequest",authorize('admin', "warden", 'student'), createRequests)
+router.get("/getAllRequests",authorize('admin', "warden", 'student'), getAllRequests)
+router.put("/updateRequest",authorize('admin', "warden", 'student'), updateRequests)
+router.delete("/deleteRequest",authorize('admin', "warden", 'student'), deleteRequest)
 
 export default router;
