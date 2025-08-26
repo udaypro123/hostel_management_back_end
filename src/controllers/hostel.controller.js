@@ -9,7 +9,14 @@ const createHostel = async (req, res) => {
 
   try {
     const hostel = await hostelService.createHostel(req.body, req.user.id);
-    
+
+    if (!hostel) {
+      return res.status(400).json({
+        success: false,
+        message: 'Error creating hostel'
+      });
+    }
+
     res.status(201).json({
       success: true,
       message: 'Hostel created successfully',
@@ -30,6 +37,13 @@ const updateHostel = async (req, res) => {
   try {
     const hostel = await hostelService.updateHostel(req.body);
 
+    if (!hostel) {
+      return res.status(400).json({
+        success: false,
+        message: 'Error updating hostel'
+      });
+    }
+
     res.status(200).json({
       success: true,
       message: 'Hostel updated successfully',
@@ -49,6 +63,13 @@ const deleteHostel = async (req, res) => {
 
   try {
     const hostel = await hostelService.deleteHostel(req.body);
+
+    if (!hostel) {
+      return res.status(404).json({
+        success: false,
+        message: 'Hostel not found'
+      });
+    }
 
     res.status(200).json({
       success: true,
@@ -107,6 +128,13 @@ const addRoomToHostel = async (req, res) => {
   try {
     const hostel = await hostelService.addRoomToHostel(req.body);
 
+    if (!hostel) {
+      return res.status(404).json({
+        success: false,
+        message: 'Hostel not found'
+      });
+    }
+
     res.status(200).json({
       success: true,
       message: 'Room added to hostel successfully',
@@ -126,6 +154,13 @@ const getAllRooms = async (req, res) => {
     
     console.log('Getting all rooms in hostel with ID:', req.query);
     const rooms = await hostelService.getAllRooms(req.query);
+
+    if (!rooms) {
+      return res.status(404).json({
+        success: false,
+        message: 'No rooms found'
+      });
+    }
 
     res.status(200).json({
       success: true,
@@ -163,6 +198,13 @@ const deleteRoom = async (req, res) => {
 
   try {
     const room = await hostelService.deleteRoom(req.body);
+
+    if(!room){
+      return res.status(404).json({
+        success: false,
+        message: 'Room not found'
+      });
+    }
 
     res.status(200).json({
       success: true,

@@ -1,3 +1,4 @@
+import { Room } from "../models/Hostel.models.js";
 import { Degree, Student } from "../models/Students.models.js";
 import { ResponseCode } from "../utils/responseList.js"
 import { authService } from "./index.js";
@@ -14,7 +15,7 @@ const CreateStudent = async (body, callback) => {
     logger.log({ level: 'debug', message: ` Add studennt  ${JSON.stringify(body)}` });
     console.log("body---------->0", body)
 
-    const { phone, email, firstName, lastName, address, gender } = body;
+    const { phone, email, firstName, lastName, address, gender, roomId } = body;
 
     let obj = {
       email,
@@ -52,6 +53,13 @@ const CreateStudent = async (body, callback) => {
     };
 
     const degreeData = new Student(degreeObj);
+
+     await Room.findOneAndUpdate(
+      { _id: body.roomId, hostelId: body.hostelId },
+      { $inc: { occupancy: 1 } },
+      { new: true }
+    );
+
     if (!degreeData && existingUser?.user?.id) {
       // Rollback the user if warden creation failed
       await User.findByIdAndDelete(existingUser?.user?.id);
@@ -59,7 +67,12 @@ const CreateStudent = async (body, callback) => {
     }
     await degreeData.save();
 
-    return callback(null, ResponseCode.SuccessCode, degreeData);
+    if (degreeData) {
+      return callback(null, ResponseCode.SuccessCode, degreeData || []);
+    } else {
+      return callback(null, ResponseCode.ServerError, []);
+    }
+
   } catch (error) {
     logger.log({ level: 'error', message: 'Exit addDegree: ' + error });
     return callback(error, null, null);
@@ -79,8 +92,12 @@ const GetAllStudents = async (body, callback) => {
       throw new Error('Hostel not found');
     }
     console.log('degree in hostel:', students);
-    return callback(null, ResponseCode.SuccessCode, students);
 
+    if (students) {
+      return callback(null, ResponseCode.SuccessCode, students);
+    } else {
+      return callback(null, ResponseCode.ServerError, []);
+    }
   } catch (error) {
     console.error('Error getting all students in hostel:', error.message);
     return callback(error, null, null);
@@ -91,15 +108,20 @@ const GetStudentsById = async (body, callback) => {
   console.log('Getting all rooms in hostel with ID:dbc', body);
   try {
     const students = await Student.findOne()
-      .populate({ path: 'hostelId', select:"hostelName wardenName"})
-      .populate({path:"roomId", select:"roomNumber rent"})
+      .populate({ path: 'hostelId', select: "hostelName wardenName" })
+      .populate({ path: "roomId", select: "roomNumber rent" })
 
 
     if (!students) {
       throw new Error('Hostel not found');
     }
     console.log('degree in hostel:', students);
-    return callback(null, ResponseCode.SuccessCode, students);
+
+    if (students) {
+      return callback(null, ResponseCode.SuccessCode, students);
+    } else {
+      return callback(null, ResponseCode.ServerError, []);
+    }
 
   } catch (error) {
     console.error('Error getting all students in hostel:', error.message);
@@ -115,7 +137,13 @@ const UpdateStudent = async (body, callback) => {
       { new: true, runValidators: true, }
     )
 
-    return callback(null, ResponseCode.SuccessCode, updatestudent)
+    if (updatestudent) {
+      return callback(null, ResponseCode.SuccessCode, updatestudent)
+    } else {
+      return callback(null, ResponseCode.ServerError, []);
+    }
+
+
   } catch (error) {
 
     return callback(null, ResponseCode.ServerError)
@@ -128,7 +156,12 @@ const DeleteStudent = async (studentId, callback) => {
     const deletestudent = await Student.findByIdAndDelete({ _id: studentId },
       { new: true, }
     )
+    if (!deletestudent) {
+      return callback(null, ResponseCode.ServerError, []);
+    }
+
     return callback(null, ResponseCode.SuccessCode, deletestudent)
+
   } catch (error) {
 
     return callback(null, ResponseCode.ServerError)
@@ -159,7 +192,12 @@ const AddDegee = async (body, callback) => {
     const degreeData = new Degree(degreeObj);
     await degreeData.save();
 
-    return callback(null, ResponseCode.SuccessCode, degreeData);
+    if (degreeData) {
+      return callback(null, ResponseCode.SuccessCode, degreeData);
+    } else {
+      return callback(null, ResponseCode.ServerError, []);
+    }
+
   } catch (error) {
     logger.log({ level: 'error', message: 'Exit addDegree: ' + error });
     return callback(error, null, null);
@@ -186,6 +224,10 @@ const getAllDegees = async (body, callback) => {
       throw new Error('Hostel not found');
     }
     console.log('degree in hostel:', degree);
+    if (!degree) {
+      return callback(null, ResponseCode.ServerError, []);
+    }
+
     return callback(null, ResponseCode.SuccessCode, degree);
 
   } catch (error) {
@@ -202,6 +244,9 @@ const updateDegees = async (body, callback) => {
       { new: true, runValidators: true, }
     )
 
+    if (!updateRoom) {
+      return callback(null, ResponseCode.ServerError, []);
+    }
     return callback(null, ResponseCode.SuccessCode, updateRoom)
   } catch (error) {
 
@@ -215,6 +260,11 @@ const DeleteDegree = async (deleteDegreeID, callback) => {
     const deleteRoom = await Degree.findByIdAndDelete({ _id: deleteDegreeID },
       { new: true, }
     )
+
+    if (!deleteRoom) {
+      return callback(null, ResponseCode.ServerError, null);
+    }
+
     return callback(null, ResponseCode.SuccessCode, deleteRoom)
   } catch (error) {
 

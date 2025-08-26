@@ -3,8 +3,9 @@ import { upload, uploadFile, uploadToCloudinary, deleteFile } from '../utils/fil
 
 const router = Router();
 
-router.post('/upload', upload.single('image'), async (req, res) => {
+router.post('/upload', upload.single('file'), async (req, res) => {
   try {
+    console.log("File uploaded:", req.file);
     const tmpPath = await uploadFile(req.file);
     const result = await uploadToCloudinary(tmpPath, 'my-app');
     await deleteFile(tmpPath);

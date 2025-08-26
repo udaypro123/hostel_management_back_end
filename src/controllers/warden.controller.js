@@ -1,83 +1,108 @@
 import Warden from '../models/Warden.models.js'
-import {wardenService} from '../dbc/index.js'
+import {CreateWarden} from "../dbc/warden.dbc.js"
 import { validationResult } from 'express-validator'
 import { Hostel } from '../models/Hostel.models.js';
+import { ResponseCode } from '../utils/responseList.js';
 
 
 
-const createWarden = async (req, res) => {
-  try {
-    // Check for validation errors
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: 'Validation failed',
-        errors: errors.array()
-      });
-    }
+// const createWarden = async (req, res) => {
+//   try {
+//     // Check for validation errors
+//     const errors = validationResult(req);
+//     if (!errors.isEmpty()) {
+//       return res.status(400).json({
+//         success: false,
+//         message: 'Validation failed',
+//         errors: errors.array()
+//       });
+//     }
 
-    // Validate warden data using service
-    const validationErrors = wardenService.validateWardenData(req.body);
-    if (validationErrors.length > 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Validation failed',
-        errors: validationErrors
-      });
-    }
+//     // Validate warden data using service
+//     const validationErrors = wardenService.validateWardenData(req.body);
+//     if (validationErrors.length > 0) {
+//       return res.status(400).json({
+//         success: false,
+//         message: 'Validation failed',
+//         errors: validationErrors
+//       });
+//     }
 
-    // Check if warden with email already exists
-    const existingWarden = await wardenService.getWardenByEmail(req.body.email);
-    if (existingWarden) {
-      return res.status(400).json({
-        success: false,
-        message: 'Warden with this email already exists'
-      });
-    }
+//     // Check if warden with email already exists
+//     const existingWarden = await wardenService.getWardenByEmail(req.body.email);
+//     if (existingWarden) {
+//       return res.status(400).json({
+//         success: false,
+//         message: 'Warden with this email already exists'
+//       });
+//     }
 
-    // Prepare warden data
-    const wardenData = {
-      ...req.body,
-      experience: req.body.experience ? parseInt(req.body.experience) : undefined,
-      joiningDate: req.body.joiningDate ? new Date(req.body.joiningDate) : undefined,
-      createdBy: req.user.id
-    };
+//     // Prepare warden data
+//     const wardenData = {
+//       ...req.body,
+//       experience: req.body.experience ? parseInt(req.body.experience) : undefined,
+//       joiningDate: req.body.joiningDate ? new Date(req.body.joiningDate) : undefined,
+//       createdBy: req.user.id
+//     };
 
-    const warden = await wardenService.createWarden(wardenData);
+//     const warden = await wardenService.createWarden(wardenData);
 
-    res.status(201).json({
-      success: true,
-      message: 'Warden created successfully',
-      data: warden
-    });
-  } catch (error) {
-    console.error('Create warden error:', error);
+//     res.status(201).json({
+//       success: true,
+//       message: 'Warden created successfully',
+//       data: warden
+//     });
+//   } catch (error) {
+//     console.error('Create warden error:', error);
     
-    // Handle duplicate key error
-    if (error.code === 11000) {
-      return res.status(400).json({
-        success: false,
-        message: 'Warden with this email already exists'
-      });
-    }
+//     // Handle duplicate key error
+//     if (error.code === 11000) {
+//       return res.status(400).json({
+//         success: false,
+//         message: 'Warden with this email already exists'
+//       });
+//     }
     
-    // Handle validation errors
-    if (error.name === 'ValidationError') {
-      const messages = Object.values(error.errors).map(err => err.message);
-      return res.status(400).json({
-        success: false,
-        message: 'Validation failed',
-        errors: messages
-      });
-    }
+//     // Handle validation errors
+//     if (error.name === 'ValidationError') {
+//       const messages = Object.values(error.errors).map(err => err.message);
+//       return res.status(400).json({
+//         success: false,
+//         message: 'Validation failed',
+//         errors: messages
+//       });
+//     }
 
-    res.status(500).json({
-      success: false,
-      message: 'Error creating warden',
-      error: error.message
+//     res.status(500).json({
+//       success: false,
+//       message: 'Error creating warden',
+//       error: error.message
+//     });
+//   }
+// };
+
+const createWarden = function (req, res, next) {
+
+    console.log("--------------->req ", req.body)
+    CreateWarden(req.body, (err, code, warden) => {
+      console.log(warden)
+        if (err) {
+            // Internal server error
+            logger.log({
+                level: 'error',
+                message: 'add warden - Error - ' + err,
+                requestId: req?.id || "Unknown"
+            });
+            return res.status(500).json({ code: ResponseCode.ServerError, message: 'Internal server error', error: err.message || err });
+        }
+
+        if (code === ResponseCode.SuccessCode) {
+            return res.status(200).json({ code, message: "warden created successfully", data: warden });
+        }
+
+        // fallback error
+        return res.status(422).json({ code, message: "Error while creating warden" });
     });
-  }
 };
 
 

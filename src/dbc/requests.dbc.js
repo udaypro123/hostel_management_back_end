@@ -21,6 +21,9 @@ const CreateRequests = async (body, callback) => {
 
         const requestData = new Request(obj);
         await requestData.save();
+        if(!requestData) {
+          return callback(null, ResponseCode.ServerError, null);
+        }
 
         return callback(null, ResponseCode.SuccessCode, requestData);
     } catch (error) {
@@ -37,6 +40,10 @@ const GetAllRequests = async (body, callback) => {
 
         if (!requests) {
             throw new Error('Hostel not found');
+        }
+
+        if(!requests){
+          return callback(null, ResponseCode.ServerError, []);
         }
         console.log('degree in hostel:', requests);
         return callback(null, ResponseCode.SuccessCode, requests);
@@ -55,6 +62,10 @@ const UpdateRequests = async (body, callback) => {
             { new: true, runValidators: true, }
         )
 
+        if(!updateRequests){
+          return callback(null, ResponseCode.ServerError, null);
+        }
+
         return callback(null, ResponseCode.SuccessCode, updateRequests)
     } catch (error) {
         return callback(null, ResponseCode.ServerError)
@@ -67,6 +78,11 @@ const DeleteRequest = async (requestId, callback) => {
         const deleteRequest = await Request.findByIdAndDelete({ _id: requestId },
             { new: true, }
         )
+
+        if(!deleteRequest){
+          return callback(null, ResponseCode.ServerError, null);
+        }
+
         return callback(null, ResponseCode.SuccessCode, deleteRequest)
     } catch (error) {
 

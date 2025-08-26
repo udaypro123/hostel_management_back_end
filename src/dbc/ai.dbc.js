@@ -142,8 +142,12 @@ const GetAIChatbyUserId = async (userId, callback) => {
   try {
     console.log("userId:--------> ", userId)
     const userChat = await AiResponseModel.findOne({ userId });
-    console.log("userChat:--------> ", userChat, userChat.studentChat)
-    return callback(null, ResponseCode.SuccessCode, userChat.studentChat);
+    if (userChat) {
+      console.log("userChat:--------> ", userChat, userChat.studentChat)
+      return callback(null, ResponseCode.SuccessCode, userChat.studentChat);
+    }else{
+      return callback(null, ResponseCode.SuccessCode, []);
+    }
   } catch (error) {
     return callback(error, ResponseCode.ServerError, null);
   }

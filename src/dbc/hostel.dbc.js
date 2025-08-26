@@ -1,4 +1,5 @@
-import  {Hostel,Room} from '../models/Hostel.models.js'
+import { Hostel, Room } from '../models/Hostel.models.js'
+import { Student } from '../models/Students.models.js';
 import User from '../models/User.models.js'
 
 // Create a new hostel
@@ -9,6 +10,10 @@ const createHostel = async (hostelData, createdBy) => {
       ...hostelData,
       createdBy,
     });
+
+    if (!hostel) {
+      throw new Error('Hostel creation failed');
+    }
 
     await hostel.save();
     return hostel;
@@ -21,7 +26,7 @@ const updateHostel = async (hostelData) => {
   console.log('Updating hostel with data:', hostelData);
   try {
     const { formData, hostelId } = hostelData;
-    console.log('Updating hostel with data:', formData, hostelId );
+    console.log('Updating hostel with data:', formData, hostelId);
 
     // ✅ Correct logic: run update if hostelId exists
     if (hostelId) {
@@ -70,7 +75,7 @@ const addRoomToHostel = async (roomData) => {
     const { hostelId, room } = roomData;
 
     let roomToAdd = new Room(room);
-    const resdata= await roomToAdd.save();
+    const resdata = await roomToAdd.save();
 
     if (!hostelId || !room) {
       throw new Error('Hostel ID and room data are required');
@@ -96,16 +101,16 @@ const getAllRooms = async (body) => {
   console.log('Getting all rooms in hostel with ID:dbc', body);
   try {
 
-    const page= body?.page || 1;
-    const limit= body?.limit || 10;
+    const page = body?.page || 1;
+    const limit = body?.limit || 10;
     const skip = page * limit;
 
     const rooms = await Room.find()
-    .skip(skip)
-    .limit(limit)
-    .sort({ createdAt: -1 })
-    .populate('hostelId');
-    
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 })
+      .populate('hostelId');
+
     if (!rooms) {
       throw new Error('Hostel not found');
     }
@@ -154,6 +159,16 @@ const deleteRoom = async (roomData) => {
   try {
     if (roomData) {
       const room = await Room.findByIdAndDelete(roomData?.deleteRoomID);
+
+      const student = await Student.updateMany(
+        { roomId: roomData?.deleteRoomID },
+        { $set: { roomId: "" } }
+      );
+
+      if (!student) {
+        throw new Error('Student not found');
+      }
+
       if (!room) {
         throw new Error('Room not found');
       }

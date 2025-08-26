@@ -23,6 +23,10 @@ const CreateAnnoucement = async (body, callback) => {
         const announceData = new Annoouncement(obj);
         await announceData.save();
 
+        if(!announceData) {
+          return callback(null, ResponseCode.ServerError, null);
+        }
+
         return callback(null, ResponseCode.SuccessCode, announceData);
     } catch (error) {
         logger.log({ level: 'error', message: 'Exit announcement: ' + error });
@@ -40,6 +44,9 @@ const GetAllAnouncement = async (body, callback) => {
             throw new Error('Hostel not found');
         }
         console.log('degree in hostel:', annoouncement);
+        if(!annoouncement){
+          return callback(null, ResponseCode.ServerError, []);
+        }
         return callback(null, ResponseCode.SuccessCode, annoouncement);
 
     } catch (error) {
@@ -56,6 +63,9 @@ const UpdateAnouncement = async (body, callback) => {
             { new: true, runValidators: true, }
         )
 
+        if(!updateAnnoouncement){
+            return callback(null, ResponseCode.ServerError, null);
+        }
         return callback(null, ResponseCode.SuccessCode, updateAnnoouncement)
     } catch (error) {
         return callback(null, ResponseCode.ServerError)
@@ -68,6 +78,11 @@ const DeleteAnouncement = async (studentId, callback) => {
         const deleteAnnoouncement = await Annoouncement.findByIdAndDelete({ _id: studentId },
             { new: true, }
         )
+
+        if(!deleteAnnoouncement){
+          return callback(null, ResponseCode.ServerError, null);
+        }
+        
         return callback(null, ResponseCode.SuccessCode, deleteAnnoouncement)
     } catch (error) {
 

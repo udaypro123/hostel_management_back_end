@@ -37,7 +37,7 @@ const limiter = rateLimit({
   legacyHeaders: false
 });
 
-app.use('/api/', limiter);
+app.use('/api/auth', limiter);
 
 // // ---- BODY PARSERS ----
 app.use(express.json({ limit: '10mb' }));
@@ -83,7 +83,7 @@ app.use('/api/payment', paymentroutes);
 app.use('/api/announcement', annoucementRoutes);
 app.use('/api/requests', requestsRoutes);
 app.use('/api', wardenRoutes);
-app.use('/api', uploadRoutes);
+app.use('/api/fileUpload', uploadRoutes);
 app.use("/api/ai", aiRoutes);
 
 // // ---- STATIC FILES ----

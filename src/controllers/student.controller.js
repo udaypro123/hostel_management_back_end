@@ -20,7 +20,7 @@ const logger = {
 
 
 const createStudent = function (req, res, next) {
-  CreateStudent(req.body, (err, code, degree) => {
+  CreateStudent(req.body, (err, code, student) => {
     if (err) {
       // Internal server error
       logger.log({
@@ -32,7 +32,7 @@ const createStudent = function (req, res, next) {
     }
 
     if (code === ResponseCode.SuccessCode) {
-      return res.status(200).json({ code, message: "Degree created successfully", degree });
+      return res.status(200).json({ code, message: "Degree created successfully", data: student });
     }
 
     // handle known errors
@@ -41,7 +41,7 @@ const createStudent = function (req, res, next) {
     }
 
     // fallback error
-    return res.status(422).json({ code, message: "Error while creating degree" });
+    return res.status(422).json({ code, message: "Error while creating student" });
   });
 };
 
