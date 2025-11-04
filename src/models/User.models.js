@@ -4,6 +4,10 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 
 const userSchema = new mongoose.Schema({
+  ownerId:{
+    type: String,
+    required: true,
+  },
   firstName: {
     type: String,
     required: [true, 'First name is required'],

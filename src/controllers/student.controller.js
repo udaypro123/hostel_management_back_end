@@ -1,5 +1,5 @@
 import {
-  AddDegee,
+  AddDegree,
   getAllDegees,
   updateDegees,
   DeleteDegree,
@@ -20,7 +20,8 @@ const logger = {
 
 
 const createStudent = function (req, res, next) {
-  CreateStudent(req.body, (err, code, student) => {
+  const ownerId = req?.user?.ownerId
+  CreateStudent(req.body, ownerId, (err, code, student) => {
     if (err) {
       // Internal server error
       logger.log({
@@ -47,7 +48,8 @@ const createStudent = function (req, res, next) {
 
 const getStudents = function (req, res, next) {
 
-  GetAllStudents(req.body, (err, code, degree) => {
+  const ownerId = req?.user?.ownerId
+  GetAllStudents(req.body, ownerId, (err, code, degree) => {
     console.log("degreedegreedegree", degree)
     if (err) {
       // Internal server error
@@ -74,9 +76,7 @@ const getStudents = function (req, res, next) {
 };
 
 const getStudentById = function (req, res, next) {
-  console.log("body", req.body)
   GetStudentsById(req.body, (err, code, degree) => {
-    console.log("degreedegreedegree", degree)
     if (err) {
       // Internal server error
       logger.log({
@@ -148,8 +148,9 @@ const deleteStudent = function (req, res, next) {
 };
 
 
-const addGree = function (req, res, next) {
-  AddDegee(req.body, (err, code, degree) => {
+const addDegree = function (req, res, next) {
+  const ownerId = req?.user?.ownerId
+  AddDegree(req.body, ownerId, (err, code, degree) => {
     if (err) {
       // Internal server error
       logger.log({
@@ -175,8 +176,8 @@ const addGree = function (req, res, next) {
 };
 
 const getAllDegree = function (req, res, next) {
-
-  getAllDegees(req.body, (err, code, degree) => {
+  const ownerId = req?.user?.ownerId
+  getAllDegees(req.body,ownerId,  (err, code, degree) => {
     console.log("degreedegreedegree", degree)
     if (err) {
       // Internal server error
@@ -251,7 +252,7 @@ const deleteDegree = function (req, res, next) {
 
 
 export {
-  addGree,
+  addDegree,
   getAllDegree,
   updateDegees,
   updateDegree,

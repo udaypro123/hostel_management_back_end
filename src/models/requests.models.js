@@ -1,7 +1,10 @@
 import mongoose from "mongoose";
 
 const requestSchema = new mongoose.Schema({
-
+    ownerId: {
+        type: String,
+        required: true,
+    },
     hostel: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Hostel"
@@ -22,13 +25,13 @@ const requestSchema = new mongoose.Schema({
         default: 'pending'
     },
     document: [{ name: { type: String }, url: { type: String } }],
-    createdBy:{
+    createdBy: {
         type: String,
-        default:""
+        default: ""
     },
-    updatedBy:{
+    updatedBy: {
         type: String,
-        default:""
+        default: ""
     }
 
 

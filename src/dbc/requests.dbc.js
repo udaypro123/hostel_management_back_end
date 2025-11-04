@@ -9,12 +9,13 @@ const logger = {
 };
 
 
-const CreateRequests = async (body, callback) => {
+const CreateRequests = async (body, ownerId, callback) => {
     try {
 
         console.log("CreateRequests ", body)
         let obj = {
-            ...body
+            ...body,
+            ownerId: ownerId
         }
 
         console.log("CreateRequests ", obj)

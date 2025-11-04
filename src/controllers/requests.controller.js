@@ -16,9 +16,9 @@ const logger = {
 
 
 const createRequests = function (req, res, next) {
-
+    const ownerId = req?.user?.ownerId
     console.log("--------------->req ", req.body)
-    CreateRequests(req.body, (err, code, request) => {
+    CreateRequests(req.body, ownerId, (err, code, request) => {
         if (err) {
             // Internal server error
             logger.log({

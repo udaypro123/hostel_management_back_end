@@ -10,12 +10,13 @@ const logger = {
 };
 
 
-const CreateAnnoucement = async (body, callback) => {
+const CreateAnnoucement = async (body,ownerId, callback) => {
     try {
 
         console.log("createaaaaaaaaaaaaaaaanoumnet ", body)
         let obj = {
-            ...body
+            ...body,
+            ownerId: ownerId
         }
         
         console.log("createaaaaaaaaaaaaaaaanoumnet ", obj)
@@ -34,10 +35,10 @@ const CreateAnnoucement = async (body, callback) => {
     }
 };
 
-const GetAllAnouncement = async (body, callback) => {
+const GetAllAnouncement = async (body, ownerId, callback) => {
     try {
         console.log('Getting all Anouncement in hostel with ID:Anouncement', body);
-        const annoouncement = await Annoouncement.find()
+        const annoouncement = await Annoouncement.find({ ownerId: ownerId })
             .populate("hostel")
 
         if (!annoouncement) {

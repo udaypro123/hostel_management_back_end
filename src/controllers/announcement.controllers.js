@@ -16,8 +16,9 @@ const logger = {
 
 const createAnnoucement = function (req, res, next) {
 
+    const ownerId = req?.user?.ownerId
     console.log("--------------->req ", req.body)
-    CreateAnnoucement(req.body, (err, code, announcement) => {
+    CreateAnnoucement(req.body,ownerId, (err, code, announcement) => {
         if (err) {
             // Internal server error
             logger.log({
@@ -45,7 +46,8 @@ const createAnnoucement = function (req, res, next) {
 const getAllAnouncement = function (req, res, next) {
 
     console.log("req--------->getAllAnouncement-", req.body)
-    GetAllAnouncement(req.body, (err, code, announcement) => {
+    const ownerId = req?.user?.ownerId
+    GetAllAnouncement(req.body, ownerId, (err, code, announcement) => {
         console.log("getAllAnouncement", announcement)
         if (err) {
             // Internal server error

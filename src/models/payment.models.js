@@ -2,6 +2,10 @@ import mongoose from "mongoose";
 import { type } from "os";
 
 const recieptSchema = new mongoose.Schema({
+    ownerId: {
+        type: String,
+        required: true,
+    },
     recieptString: {
         type: String,
         default: "",
@@ -9,6 +13,10 @@ const recieptSchema = new mongoose.Schema({
 }, { timestamps: true })
 
 const paymentTransactionSchema = new mongoose.Schema({
+    ownerId: {
+        type: String,
+        required: true,
+    },
     orderId: {
         type: String,
         default: "",
@@ -35,11 +43,15 @@ const paymentTransactionSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
-    
+
 
 }, { timestamps: true })
 
 const paymentOrderSchema = new mongoose.Schema({
+    ownerId: {
+        type: String,
+        required: true,
+    },
     amount: {
         type: Number
     },
@@ -82,13 +94,13 @@ const paymentOrderSchema = new mongoose.Schema({
         ref: "PaymentTransactionModel"
     },
     roomNumber: {
-        type:String,
+        type: String,
     },
     hostelName: {
-        type:String,
-        default:""
+        type: String,
+        default: ""
     },
-   
+
 
 }, { timestamps: true })
 

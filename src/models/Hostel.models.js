@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 
 const hostelSchema = new mongoose.Schema({
+  ownerId: {
+    type: String,
+    required: true,
+  },
   hostelName: {
     type: String,
     required: [true, 'Hostel name is required'],
@@ -67,6 +71,10 @@ const hostelSchema = new mongoose.Schema({
 
 
 const roomSchema = new mongoose.Schema({
+  ownerId: {
+    type: String,
+    required: true,
+  },
   roomNumber: {
     type: String,
     required: [true, 'Room number is required'],

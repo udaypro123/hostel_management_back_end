@@ -3,6 +3,10 @@
 import mongoose from 'mongoose';
 
 const wardenSchema = new mongoose.Schema({
+  ownerId:{
+    type: String,
+    required: true,
+  },
   userId:{
     type:mongoose.Schema.Types.ObjectId,
     ref:"User",

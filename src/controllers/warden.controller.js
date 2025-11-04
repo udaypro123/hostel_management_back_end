@@ -1,9 +1,9 @@
 import Warden from '../models/Warden.models.js'
-import {CreateWarden} from "../dbc/warden.dbc.js"
+import { CreateWarden } from "../dbc/warden.dbc.js"
 import { validationResult } from 'express-validator'
 import { Hostel } from '../models/Hostel.models.js';
 import { ResponseCode } from '../utils/responseList.js';
-
+import logger from '../utils/logger.js';
 
 
 // const createWarden = async (req, res) => {
@@ -54,7 +54,7 @@ import { ResponseCode } from '../utils/responseList.js';
 //     });
 //   } catch (error) {
 //     console.error('Create warden error:', error);
-    
+
 //     // Handle duplicate key error
 //     if (error.code === 11000) {
 //       return res.status(400).json({
@@ -62,7 +62,7 @@ import { ResponseCode } from '../utils/responseList.js';
 //         message: 'Warden with this email already exists'
 //       });
 //     }
-    
+
 //     // Handle validation errors
 //     if (error.name === 'ValidationError') {
 //       const messages = Object.values(error.errors).map(err => err.message);
@@ -83,32 +83,41 @@ import { ResponseCode } from '../utils/responseList.js';
 
 const createWarden = function (req, res, next) {
 
-    console.log("--------------->req ", req.body)
-    CreateWarden(req.body, (err, code, warden) => {
-      console.log(warden)
-        if (err) {
-            // Internal server error
-            logger.log({
-                level: 'error',
-                message: 'add warden - Error - ' + err,
-                requestId: req?.id || "Unknown"
-            });
-            return res.status(500).json({ code: ResponseCode.ServerError, message: 'Internal server error', error: err.message || err });
-        }
+  const ownerId = req?.user?.ownerId
+  console.log("ownerId", ownerId, req.user)
+  logger.log({
+    level: 'info',
+    message: 'add warden - Request received',
+    requestId: req?.id || "Unknown",
+    ownerId: ownerId || "Unknown"
+  });
 
-        if (code === ResponseCode.SuccessCode) {
-            return res.status(200).json({ code, message: "warden created successfully", data: warden });
-        }
+  CreateWarden(req.body, ownerId, (err, code, warden) => {
+    console.log(warden)
+    if (err) {
+      // Internal server error
+      logger.log({
+        level: 'error',
+        message: 'add warden - Error - ' + err,
+        requestId: req?.id || "Unknown"
+      });
+      return res.status(500).json({ code: ResponseCode.ServerError, message: 'Internal server error', error: err.message || err });
+    }
 
-        // fallback error
-        return res.status(422).json({ code, message: "Error while creating warden" });
-    });
+    if (code === ResponseCode.SuccessCode) {
+      return res.status(200).json({ code, message: "warden created successfully", data: warden });
+    }
+
+    // fallback error
+    return res.status(422).json({ code, message: "Error while creating warden" });
+  });
 };
 
 
 const getWarden = async (req, res) => {
   try {
-    const warden = await Warden.find()
+    const ownerId = req?.user?.ownerId
+    const warden = await Warden.find({ ownerId: ownerId })
 
     if (!warden) {
       return res.status(404).json({
@@ -141,10 +150,10 @@ const getWardenById = async (req, res) => {
   try {
 
     console.log(req.body, "bodyy")
-    const {wardenId}= req.body
-    const warden = await Hostel.findOne(wardenId)
-    .populate("wardenId")
-    .populate("rooms")
+    const { wardenId } = req.body
+    const warden = await Hostel.findOne({wardenId, ownerId: req?.user?.ownerId})
+      .populate("wardenId")
+      .populate("rooms")
     // const wardenUser = await Hostel.findOne({wardenId:warden?._id}).populate("rooms")
     console.log("warden", warden)
 
@@ -202,7 +211,7 @@ const updateWarden = async (req, res) => {
     console.log('Update Warden Data:', req.body);
     console.log('Update Warden ID:', req.params.id);
     // Check if warden exists
-    let warden = await Warden.findById(req.body.id);
+    let warden = await Warden.findById({ _id: req.body.id, ownerId: req?.user?.ownerId });
     if (!warden) {
       return res.status(404).json({
         success: false,
@@ -236,7 +245,7 @@ const updateWarden = async (req, res) => {
     };
 
     // Remove undefined values
-    Object.keys(updateData).forEach(key => 
+    Object.keys(updateData).forEach(key =>
       updateData[key] === undefined && delete updateData[key]
     );
 
@@ -256,21 +265,21 @@ const updateWarden = async (req, res) => {
     });
   } catch (error) {
     console.error('Update warden error:', error);
-    
+
     if (error.name === 'CastError') {
       return res.status(400).json({
         success: false,
         message: 'Invalid warden ID'
       });
     }
-    
+
     if (error.code === 11000) {
       return res.status(400).json({
         success: false,
         message: 'Warden with this email already exists'
       });
     }
-    
+
     if (error.name === 'ValidationError') {
       const messages = Object.values(error.errors).map(err => err.message);
       return res.status(400).json({
@@ -294,7 +303,7 @@ const updateWarden = async (req, res) => {
 const deleteWarden = async (req, res) => {
   try {
     console.log('Delete Warden ID:', req.body);
-    const warden = await Warden.findById(req.body.wardenId);
+    const warden = await Warden.findById({ _id: req.body.wardenId, ownerId: req?.user?.ownerId });
 
     if (!warden) {
       return res.status(404).json({
@@ -312,7 +321,7 @@ const deleteWarden = async (req, res) => {
     });
   } catch (error) {
     console.error('Delete warden error:', error);
-    
+
     if (error.name === 'CastError') {
       return res.status(400).json({
         success: false,
@@ -334,7 +343,7 @@ const deleteWarden = async (req, res) => {
 const getWardensByHostel = async (req, res) => {
   try {
     const hostelName = decodeURIComponent(req.params.hostelName);
-    
+
     const wardens = await Warden.find({
       hostelAssigned: { $regex: hostelName, $options: 'i' },
       isActive: true

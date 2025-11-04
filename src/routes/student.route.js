@@ -1,7 +1,7 @@
 import express from "express";
 
 import {
-    addGree,
+    addDegree,
     getAllDegree,
     updateDegree,
     deleteDegree,
@@ -24,7 +24,7 @@ router.put("/updateStudent", authorize('admin'), updateStudent)
 router.delete("/deleteStudent", authorize('admin'), deleteStudent)
 router.get("/getStudentById",authorize('admin', "warden", 'student'), getStudentById)
 
-router.post("/addDegree",authorize('admin',), addGree)
+router.post("/addDegree",authorize('admin',), addDegree)
 router.get("/getDegree",authorize('admin', "warden", 'student'), getAllDegree)
 router.put("/updateDegree",authorize('admin', "warden"), updateDegree)
 router.delete("/deleteDegree",authorize('admin', "warden"), deleteDegree)

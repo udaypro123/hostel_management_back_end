@@ -3,12 +3,13 @@ import { Student } from '../models/Students.models.js';
 import User from '../models/User.models.js'
 
 // Create a new hostel
-const createHostel = async (hostelData, createdBy) => {
+const createHostel = async (hostelData, createdBy, ownerId) => {
   try {
     console.log('Creating hostel with data:', hostelData, 'by user:', createdBy);
     const hostel = new Hostel({
       ...hostelData,
       createdBy,
+      ownerId
     });
 
     if (!hostel) {
@@ -69,12 +70,12 @@ const deleteHostel = async (hostelData) => {
 };
 
 
-const addRoomToHostel = async (roomData) => {
-  console.log('Adding room to hostel with data:', roomData);
+const addRoomToHostel = async (roomData, ownerId) => {
+  console.log('Adding room to hostel with data:', roomData, ownerId);
   try {
     const { hostelId, room } = roomData;
 
-    let roomToAdd = new Room(room);
+    let roomToAdd = new Room({...room,ownerId});
     const resdata = await roomToAdd.save();
 
     if (!hostelId || !room) {
@@ -97,15 +98,15 @@ const addRoomToHostel = async (roomData) => {
 };
 
 
-const getAllRooms = async (body) => {
-  console.log('Getting all rooms in hostel with ID:dbc', body);
+const getAllRooms = async (body, userId) => {
+  console.log('Getting all rooms in hostel with ID:dbc', body, userId);
   try {
 
     const page = body?.page || 1;
     const limit = body?.limit || 10;
     const skip = page * limit;
 
-    const rooms = await Room.find()
+    const rooms = await Room.find({ ownerId: userId })
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 })

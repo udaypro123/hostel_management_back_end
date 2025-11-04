@@ -1,7 +1,10 @@
 import mongoose from "mongoose";
 
 const annoouncementSchema = new mongoose.Schema({
-
+  ownerId:{
+    type: String,
+    required: true,
+  },
     hostel: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Hostel"

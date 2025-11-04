@@ -1,14 +1,14 @@
 import { hostelService } from '../dbc/index.js';
-import {Hostel} from '../models/Hostel.models.js'
+import { Hostel } from '../models/Hostel.models.js'
 
 // @desc    Create a new hostel
 // @route   POST /api/hostels
 // @access  Private/Admin
 const createHostel = async (req, res) => {
   console.log('Creating hostel with data:', req.body, 'by user:', req.user.id);
-
+  const ownerId = req?.user?.ownerId;
   try {
-    const hostel = await hostelService.createHostel(req.body, req.user.id);
+    const hostel = await hostelService.createHostel(req.body, req.user.id, ownerId);
 
     if (!hostel) {
       return res.status(400).json({
@@ -90,7 +90,8 @@ const deleteHostel = async (req, res) => {
 
 const getHostels = async (req, res) => {
   try {
-    const hostels = await Hostel.find();
+    const ownerId = req?.user?.ownerId
+    const hostels = await Hostel.find({ ownerId: ownerId });
 
     if (!hostels) {
       return res.status(404).json({
@@ -124,9 +125,13 @@ const getHostels = async (req, res) => {
 // @route   POST /api/hostels/addRoomToHostel 
 
 const addRoomToHostel = async (req, res) => {
-  console.log('Adding room to hostel with data:', req.body);  
+  console.log('Adding room to hostel with data:', req.body);
+  const ownerId = req?.user?.ownerId
+  console.log("ownerId", ownerId, req.user)
+
+
   try {
-    const hostel = await hostelService.addRoomToHostel(req.body);
+    const hostel = await hostelService.addRoomToHostel(req.body, ownerId);
 
     if (!hostel) {
       return res.status(404).json({
@@ -151,9 +156,9 @@ const addRoomToHostel = async (req, res) => {
 // @desc    Get all rooms in a hostel
 const getAllRooms = async (req, res) => {
   try {
-    
-    console.log('Getting all rooms in hostel with ID:', req.query);
-    const rooms = await hostelService.getAllRooms(req.query);
+
+    console.log('Getting all rooms in hostel with ID:', req.query, req?.user?.ownerId);
+    const rooms = await hostelService.getAllRooms(req.query, req?.user?.ownerId);
 
     if (!rooms) {
       return res.status(404).json({
@@ -199,7 +204,7 @@ const deleteRoom = async (req, res) => {
   try {
     const room = await hostelService.deleteRoom(req.body);
 
-    if(!room){
+    if (!room) {
       return res.status(404).json({
         success: false,
         message: 'Room not found'

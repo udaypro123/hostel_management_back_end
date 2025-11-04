@@ -1,7 +1,10 @@
 import mongoose from "mongoose";
 
 const degreeSchema = new mongoose.Schema({
-
+    ownerId: {
+        type: String,
+        required: true,
+    },
     degreeName: {
         type: String,
         required: true,
@@ -25,6 +28,10 @@ const degreeSchema = new mongoose.Schema({
 }, { timestamps: true })
 
 const aiResponseSchema = new mongoose.Schema({
+    ownerId: {
+        type: String,
+        required: true,
+    },
     userId: {
         type: String,
         required: true
@@ -44,6 +51,10 @@ const aiResponseSchema = new mongoose.Schema({
 }, { timestamps: true })
 
 const studentSchema = new mongoose.Schema({
+  ownerId: {
+            type: String,
+            required: true,
+      },
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",

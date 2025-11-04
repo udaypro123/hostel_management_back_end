@@ -10,7 +10,7 @@ const logger = {
 };
 
 
-const CreateStudent = async (body, callback) => {
+const CreateStudent = async (body,ownerId, callback) => {
   try {
     logger.log({ level: 'debug', message: ` Add studennt  ${JSON.stringify(body)}` });
     console.log("body---------->0", body)
@@ -26,6 +26,7 @@ const CreateStudent = async (body, callback) => {
       address,
       role: "student",
       gender: gender,
+      ownerId: ownerId,
     }
 
     const existingUser = await authService.registerUser(obj)
@@ -50,6 +51,7 @@ const CreateStudent = async (body, callback) => {
       address: body.address,
       enrolledDegree: body.enrolledDegree,
       userId: existingUser?.user?.id,
+      ownerId: ownerId,
     };
 
     const degreeData = new Student(degreeObj);
@@ -79,10 +81,10 @@ const CreateStudent = async (body, callback) => {
   }
 };
 
-const GetAllStudents = async (body, callback) => {
+const GetAllStudents = async (body, ownerId, callback) => {
   console.log('Getting all rooms in hostel with ID:dbc', body);
   try {
-    const students = await Student.find()
+    const students = await Student.find({ ownerId: ownerId })
       .populate("hostelId")
       .populate("roomId")
       .populate("enrolledDegree")
@@ -171,11 +173,11 @@ const DeleteStudent = async (studentId, callback) => {
 /// below  Degree related databse is 
 
 
-const AddDegee = async (body, callback) => {
+const AddDegree = async (body, ownerId, callback) => {
   try {
     logger.log({ level: 'debug', message: ` Add degree ${JSON.stringify(body)}` });
 
-    const data = await Degree.findOne({ status: 1, degreeName: body.degreeName });
+    const data = await Degree.findOne({ status: 1, degreeName: body.degreeName, ownerId: ownerId });
 
     if (data) {
       return callback(null, ResponseCode.degreeAlreadyExits, null);
@@ -187,6 +189,7 @@ const AddDegee = async (body, callback) => {
       departmentName: body.departmentName,
       degreeYear: body.degreeYear,
       AdmissionYear: body.AdmissionYear,
+      ownerId: ownerId,
     };
 
     const degreeData = new Degree(degreeObj);
@@ -205,7 +208,7 @@ const AddDegee = async (body, callback) => {
 };
 
 
-const getAllDegees = async (body, callback) => {
+const getAllDegees = async (body,ownerId, callback) => {
   console.log('Getting all rooms in hostel with ID:dbc', body);
   try {
 
@@ -215,7 +218,7 @@ const getAllDegees = async (body, callback) => {
 
     console.log("page limit---sskip", page, limit, skip)
 
-    const degree = await Degree.find()
+    const degree = await Degree.find({ ownerId: ownerId })
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 })
@@ -275,7 +278,7 @@ const DeleteDegree = async (deleteDegreeID, callback) => {
 
 
 export {
-  AddDegee,
+  AddDegree,
   getAllDegees,
   updateDegees,
   DeleteDegree,

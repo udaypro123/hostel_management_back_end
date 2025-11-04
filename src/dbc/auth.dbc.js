@@ -2,13 +2,14 @@
 import User from "../models/User.models.js"
 import jwt from "jsonwebtoken"
 import crypto from "crypto"
- import { sendEmail , emailTemplates} from "../utils/emailService.js";
+import { sendEmail , emailTemplates} from "../utils/emailService.js";
+import { nanoid } from 'nanoid'
 
 class AuthService {
   // Register new user
   async registerUser(userData) {
     try {
-      const {
+      let {
         firstName,
         lastName,
         email,
@@ -17,7 +18,8 @@ class AuthService {
         dateOfBirth,
         gender,
         role,
-        address
+        address,
+        ownerId
       } = userData;
 
       // Check if user already exists
@@ -26,17 +28,33 @@ class AuthService {
         throw new Error('User already exists with this email');
       }
 
+      if(!ownerId){
+        ownerId = nanoid();
+      }
+      
+      console.log("ownerId", ownerId)
+
+      if(!phoneNumber || phoneNumber.trim() === ''){
+        throw new Error('Phone number is required');
+      }
+      if(email && email.trim() === ''){
+        throw new Error('Email is required');
+      }
+      if(ownerId && ownerId.trim() === ''){
+        throw new Error('ownerId is required');
+      }
       // Create user
       const user = await User.create({
         firstName,
         lastName,
         email,
         password,
-        phoneNumber: phoneNumber || '+1234567890',
-        dateOfBirth: dateOfBirth || new Date('1990-01-01'),
+        phoneNumber: phoneNumber,
+        dateOfBirth: dateOfBirth,
         gender: gender || 'other',
         role: role || 'student',
-        address
+        address,
+        ownerId
       });
 
       // Generate email verification token
