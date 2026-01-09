@@ -5,7 +5,12 @@ import User from '../models/User.models.js'
 // Create a new hostel
 const createHostel = async (hostelData, createdBy, ownerId) => {
   try {
-    console.log('Creating hostel with data:', hostelData, 'by user:', createdBy);
+    console.log('Creating hostel with data:', hostelData, 'by user:', createdBy,ownerId);
+    const existingHostel = await Hostel.findOne({ name: hostelData.name, ownerId });
+    if (existingHostel) {
+      throw new Error('Hostel with this name already exists');
+    }
+    
     const hostel = new Hostel({
       ...hostelData,
       createdBy,

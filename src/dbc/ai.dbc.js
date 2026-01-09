@@ -23,7 +23,7 @@ async function webSearch({ query }) {
   return responseContent;
 }
 
-const AskFromAi = async (body, callback) => {
+const AskFromAi = async (body, ownerId,callback) => {
   try {
 
     const { query, sender } = body;
@@ -43,7 +43,7 @@ const AskFromAi = async (body, callback) => {
       content: query
     }
 
-    const userExists = await AiResponseModel.findOne({ userId: sender });
+    const userExists = await AiResponseModel.findOne({ userId: sender, ownerId: ownerId });
     console.log("userExists", userExists);
 
     if (userExists) {
@@ -52,6 +52,7 @@ const AskFromAi = async (body, callback) => {
     } else {
       const aiResponse = new AiResponseModel({
         userId: sender,
+        ownerId: ownerId,
         studentChat: [dbdata]
       });
       await aiResponse.save();
@@ -138,10 +139,10 @@ const AskFromAi = async (body, callback) => {
   }
 };
 
-const GetAIChatbyUserId = async (userId, callback) => {
+const GetAIChatbyUserId = async (userId, ownerId, callback) => {
   try {
     console.log("userId:--------> ", userId)
-    const userChat = await AiResponseModel.findOne({ userId });
+    const userChat = await AiResponseModel.findOne({ userId , ownerId: ownerId});
     if (userChat) {
       console.log("userChat:--------> ", userChat, userChat.studentChat)
       return callback(null, ResponseCode.SuccessCode, userChat.studentChat);

@@ -10,8 +10,8 @@ const logger = {
 
 const askFromAi = function (req, res) {
   console.log("--------------->req ", req.body);
-
-  AskFromAi(req.body, (err, code, ask) => {
+   const ownerId = req?.user?.ownerId;
+  AskFromAi(req.body,ownerId, (err, code, ask) => {
     // console.log("code and ask--------->", code , ask , ResponseCode.SuccessCode )
     if (err) {
       logger.log({
@@ -40,8 +40,8 @@ const askFromAi = function (req, res) {
 
 const getAIChatbyUserId = function (req, res, next) {
   console.log("getAIChatbyUserId===?. ", req.query);
-
-  GetAIChatbyUserId(req.query.userId, (err, code, ask) => {
+ const ownerId = req?.user?.ownerId;
+  GetAIChatbyUserId(req.query.userId, ownerId, (err, code, ask) => {
     // console.log("code and ask--------->", code , ask , ResponseCode.SuccessCode )
     if (err) {
       logger.log({
